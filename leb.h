@@ -42,10 +42,10 @@ LEBDEF void leb_MergeNode_Square(cbt_Tree *cbt,
 
 // subdivision routine O(depth)
 LEBDEF void leb_DecodeNodeAttributeArray(const cbt_Node node,
-                                         int attributeArraySize,
+                                         int64_t attributeArraySize,
                                          float attributeArray[][3]);
 LEBDEF void leb_DecodeNodeAttributeArray_Square(const cbt_Node node,
-                                                int attributeArraySize,
+                                                int64_t attributeArraySize,
                                                 float attributeArray[][3]);
 
 #ifdef __cplusplus
@@ -156,7 +156,7 @@ leb_DecodeSameDepthNeighborIDs(const cbt_Node node)
     leb__SameDepthNeighborIDs nodeIDs =
         leb__CreateSameDepthNeighborIDs(0u, 0u, 0u, 1u);
 
-    for (int bitID = node.depth - 1; bitID >= 0; --bitID) {
+    for (int64_t bitID = node.depth - 1; bitID >= 0; --bitID) {
         nodeIDs = leb__SplitNodeIDs(nodeIDs, leb__GetBitValue(node.id, bitID));
     }
 
@@ -169,11 +169,11 @@ leb_DecodeSameDepthNeighborIDs_Square(const cbt_Node node)
     if (node.depth == 0)
         return leb__CreateSameDepthNeighborIDs(0u, 0u, 0u, 1u);
 
-    uint b = leb__GetBitValue(node.id, node.depth - 1);
+    uint64_t b = leb__GetBitValue(node.id, node.depth - 1);
     leb__SameDepthNeighborIDs nodeIDs =
         leb__CreateSameDepthNeighborIDs(0u, 0u, 3u - b, 2u + b);
 
-    for (int bitID = node.depth - 2; bitID >= 0; --bitID) {
+    for (int64_t bitID = node.depth - 2; bitID >= 0; --bitID) {
         nodeIDs = leb__SplitNodeIDs(nodeIDs, leb__GetBitValue(node.id, bitID));
     }
 
@@ -187,14 +187,14 @@ leb_DecodeSameDepthNeighborIDs_Square(const cbt_Node node)
  */
 cbt_Node leb__EdgeNeighbor(const cbt_Node node)
 {
-    uint nodeID = leb_DecodeSameDepthNeighborIDs(node).edge;
+    uint64_t nodeID = leb_DecodeSameDepthNeighborIDs(node).edge;
 
     return cbt_CreateNode(nodeID, (nodeID == 0u) ? 0 : node.depth);
 }
 
 cbt_Node leb__EdgeNeighbor_Square(const cbt_Node node)
 {
-    uint nodeID = leb_DecodeSameDepthNeighborIDs_Square(node).edge;
+    uint64_t nodeID = leb_DecodeSameDepthNeighborIDs_Square(node).edge;
 
     return cbt_CreateNode(nodeID, (nodeID == 0u) ? 0 : node.depth);
 }
@@ -207,7 +207,7 @@ cbt_Node leb__EdgeNeighbor_Square(const cbt_Node node)
 void leb_SplitNode(cbt_Tree *cbt, const cbt_Node node)
 {
     if (!cbt_IsCeilNode(cbt, node)) {
-        const uint minNodeID = 1u;
+        const uint64_t minNodeID = 1u;
         cbt_Node nodeIterator = node;
 
         cbt_SplitNode(cbt, nodeIterator);
@@ -225,7 +225,7 @@ void leb_SplitNode(cbt_Tree *cbt, const cbt_Node node)
 void leb_SplitNode_Square(cbt_Tree *cbt, const cbt_Node node)
 {
     if (!cbt_IsCeilNode(cbt, node)) {
-        const uint minNodeID = 1u;
+        const uint64_t minNodeID = 1u;
         cbt_Node nodeIterator = node;
 
         cbt_SplitNode(cbt, nodeIterator);
@@ -250,7 +250,7 @@ void leb_SplitNode_Square(cbt_Tree *cbt, const cbt_Node node)
 leb_DiamondParent leb_DecodeDiamondParent(const cbt_Node node)
 {
     cbt_Node parentNode = cbt_ParentNode(node);
-    uint edgeNeighborID = leb_DecodeSameDepthNeighborIDs(parentNode).edge;
+    uint64_t edgeNeighborID = leb_DecodeSameDepthNeighborIDs(parentNode).edge;
     cbt_Node edgeNeighborNode = cbt_CreateNode(
         edgeNeighborID > 0u ? edgeNeighborID : parentNode.id,
         parentNode.depth
@@ -262,7 +262,7 @@ leb_DiamondParent leb_DecodeDiamondParent(const cbt_Node node)
 leb_DiamondParent leb_DecodeDiamondParent_Square(const cbt_Node node)
 {
     cbt_Node parentNode = cbt_ParentNode(node);
-    uint edgeNeighborID = leb_DecodeSameDepthNeighborIDs_Square(parentNode).edge;
+    uint64_t edgeNeighborID = leb_DecodeSameDepthNeighborIDs_Square(parentNode).edge;
     cbt_Node edgeNeighborNode = cbt_CreateNode(
         edgeNeighborID > 0u ? edgeNeighborID : parentNode.id,
         parentNode.depth
@@ -358,7 +358,7 @@ static void leb__TransposeMatrix3x3(const lebMatrix3x3 m, lebMatrix3x3 out)
  * DotProduct -- Returns the dot product of two vectors
  *
  */
-static float leb__DotProduct(int argSize, const float *x, const float *y)
+static float leb__DotProduct(int64_t argSize, const float *x, const float *y)
 {
     float dp = 0.0f;
 
@@ -490,7 +490,7 @@ leb__DecodeTransformationMatrix_Square(
 LEBDEF void
 leb_DecodeNodeAttributeArray(
     const cbt_Node node,
-    int attributeArraySize,
+    int64_t attributeArraySize,
     float attributeArray[][3]
 ) {
     LEB_ASSERT(attributeArraySize > 0);
@@ -511,7 +511,7 @@ leb_DecodeNodeAttributeArray(
 LEBDEF void
 leb_DecodeNodeAttributeArray_Square(
     const cbt_Node node,
-    int attributeArraySize,
+    int64_t attributeArraySize,
     float attributeArray[][3]
 ) {
     LEB_ASSERT(attributeArraySize > 0);
