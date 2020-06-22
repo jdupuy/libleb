@@ -33,17 +33,17 @@ LEBDEF leb_DiamondParent leb_DecodeDiamondParent_Square(const cbt_Node node);
 // manipulation
 LEBDEF void leb_SplitNode       (cbt_Tree *cbt, const cbt_Node node);
 LEBDEF void leb_SplitNode_Square(cbt_Tree *cbt, const cbt_Node node);
-LEBDEF void leb_MergeNode(cbt_Tree *cbt,
-                          const cbt_Node node,
-                          const leb_DiamondParent diamond);
+LEBDEF void leb_MergeNode       (cbt_Tree *cbt,
+                                 const cbt_Node node,
+                                 const leb_DiamondParent diamond);
 LEBDEF void leb_MergeNode_Square(cbt_Tree *cbt,
                                  const cbt_Node node,
                                  const leb_DiamondParent diamond);
 
 // subdivision routine O(depth)
-LEBDEF void leb_DecodeNodeAttributeArray(const cbt_Node node,
-                                         int64_t attributeArraySize,
-                                         float attributeArray[][3]);
+LEBDEF void leb_DecodeNodeAttributeArray       (const cbt_Node node,
+                                                int64_t attributeArraySize,
+                                                float attributeArray[][3]);
 LEBDEF void leb_DecodeNodeAttributeArray_Square(const cbt_Node node,
                                                 int64_t attributeArraySize,
                                                 float attributeArray[][3]);
