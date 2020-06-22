@@ -27,18 +27,18 @@ extern "C" {
 typedef struct {
     cbt_Node base, top;
 } leb_DiamondParent;
-leb_DiamondParent leb_DecodeDiamondParent       (const cbt_Node node);
-leb_DiamondParent leb_DecodeDiamondParent_Square(const cbt_Node node);
+LEBDEF leb_DiamondParent leb_DecodeDiamondParent       (const cbt_Node node);
+LEBDEF leb_DiamondParent leb_DecodeDiamondParent_Square(const cbt_Node node);
 
 // manipulation
-void leb_SplitNode       (cbt_Tree *cbt, const cbt_Node node);
-void leb_SplitNode_Square(cbt_Tree *cbt, const cbt_Node node);
-void leb_MergeNode(cbt_Tree *cbt,
-                   const cbt_Node node,
-                   const leb_DiamondParent diamond);
-void leb_MergeNode_Square(cbt_Tree *cbt,
+LEBDEF void leb_SplitNode       (cbt_Tree *cbt, const cbt_Node node);
+LEBDEF void leb_SplitNode_Square(cbt_Tree *cbt, const cbt_Node node);
+LEBDEF void leb_MergeNode(cbt_Tree *cbt,
                           const cbt_Node node,
                           const leb_DiamondParent diamond);
+LEBDEF void leb_MergeNode_Square(cbt_Tree *cbt,
+                                 const cbt_Node node,
+                                 const leb_DiamondParent diamond);
 
 // subdivision routine O(depth)
 LEBDEF void leb_DecodeNodeAttributeArray(const cbt_Node node,
