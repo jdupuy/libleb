@@ -146,10 +146,7 @@ leb_DecodeSameDepthNeighborIDs(in const cbt_Node node)
 leb__SameDepthNeighborIDs
 leb_DecodeSameDepthNeighborIDs_Square(in const cbt_Node node)
 {
-    if (node.depth == 0)
-        return leb__CreateSameDepthNeighborIDs(0u, 0u, 0u, 1u);
-
-    uint b = leb__GetBitValue(node.id, node.depth - 1);
+    uint b = leb__GetBitValue(node.id, max(0, node.depth - 1));
     leb__SameDepthNeighborIDs nodeIDs =
         leb__CreateSameDepthNeighborIDs(0u, 0u, 3u - b, 2u + b);
 
@@ -193,9 +190,9 @@ void leb_SplitNode(const int cbtID, in const cbt_Node node)
         cbt_SplitNode(cbtID, nodeIterator);
         nodeIterator = leb__EdgeNeighbor(nodeIterator);
 
-        while (nodeIterator.id >= minNodeID) {
+        while (nodeIterator.id > minNodeID) {
             cbt_SplitNode(cbtID, nodeIterator);
-            nodeIterator = cbt_ParentNode(nodeIterator);
+            nodeIterator = cbt_ParentNode_Fast(nodeIterator);
             cbt_SplitNode(cbtID, nodeIterator);
             nodeIterator = leb__EdgeNeighbor(nodeIterator);
         }
@@ -211,11 +208,14 @@ void leb_SplitNode_Square(const int cbtID, in const cbt_Node node)
         cbt_SplitNode(cbtID, nodeIterator);
         nodeIterator = leb__EdgeNeighbor_Square(nodeIterator);
 
-        while (nodeIterator.id >= minNodeID) {
+        while (nodeIterator.id > minNodeID) {
             cbt_SplitNode(cbtID, nodeIterator);
-            nodeIterator = cbt_ParentNode(nodeIterator);
-            cbt_SplitNode(cbtID, nodeIterator);
-            nodeIterator = leb__EdgeNeighbor_Square(nodeIterator);
+            nodeIterator = cbt_ParentNode_Fast(nodeIterator);
+
+            if (nodeIterator.id > minNodeID) {
+                cbt_SplitNode(cbtID, nodeIterator);
+                nodeIterator = leb__EdgeNeighbor_Square(nodeIterator);
+            }
         }
     }
 }
@@ -229,7 +229,7 @@ void leb_SplitNode_Square(const int cbtID, in const cbt_Node node)
  */
 leb_DiamondParent leb_DecodeDiamondParent(in const cbt_Node node)
 {
-    cbt_Node parentNode = cbt_ParentNode(node);
+    cbt_Node parentNode = cbt_ParentNode_Fast(node);
     uint edgeNeighborID = leb_DecodeSameDepthNeighborIDs(parentNode).edge;
     cbt_Node edgeNeighborNode = cbt_CreateNode(
         edgeNeighborID > 0u ? edgeNeighborID : parentNode.id,
@@ -241,7 +241,7 @@ leb_DiamondParent leb_DecodeDiamondParent(in const cbt_Node node)
 
 leb_DiamondParent leb_DecodeDiamondParent_Square(in const cbt_Node node)
 {
-    cbt_Node parentNode = cbt_ParentNode(node);
+    cbt_Node parentNode = cbt_ParentNode_Fast(node);
     uint edgeNeighborID = leb_DecodeSameDepthNeighborIDs_Square(parentNode).edge;
     cbt_Node edgeNeighborNode = cbt_CreateNode(
         edgeNeighborID > 0u ? edgeNeighborID : parentNode.id,
@@ -372,9 +372,10 @@ mat3 leb__DecodeTransformationMatrix(in const cbt_Node node)
 
 mat3 leb__DecodeTransformationMatrix_Square(in const cbt_Node node)
 {
-    mat3 xf = leb__SquareMatrix(leb__GetBitValue(node.id, node.depth - 1));
+    int bitID = max(0, node.depth - 1);
+    mat3 xf = leb__SquareMatrix(leb__GetBitValue(node.id, bitID));
 
-    for (int bitID = node.depth - 2; bitID >= 0; --bitID) {
+    for (bitID = node.depth - 2; bitID >= 0; --bitID) {
         xf = leb__SplittingMatrix(leb__GetBitValue(node.id, bitID)) * xf;
     }
 

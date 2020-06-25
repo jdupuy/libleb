@@ -166,14 +166,12 @@ leb_DecodeSameDepthNeighborIDs(const cbt_Node node)
 leb__SameDepthNeighborIDs
 leb_DecodeSameDepthNeighborIDs_Square(const cbt_Node node)
 {
-    if (node.depth == 0)
-        return leb__CreateSameDepthNeighborIDs(0u, 0u, 0u, 1u);
-
-    uint64_t b = leb__GetBitValue(node.id, node.depth - 1);
+    int64_t bitID = node.depth > 0 ? node.depth - 1 : 0;
+    uint64_t b = leb__GetBitValue(node.id, bitID);
     leb__SameDepthNeighborIDs nodeIDs =
         leb__CreateSameDepthNeighborIDs(0u, 0u, 3u - b, 2u + b);
 
-    for (int64_t bitID = node.depth - 2; bitID >= 0; --bitID) {
+    for (bitID = node.depth - 2; bitID >= 0; --bitID) {
         nodeIDs = leb__SplitNodeIDs(nodeIDs, leb__GetBitValue(node.id, bitID));
     }
 
@@ -213,9 +211,9 @@ void leb_SplitNode(cbt_Tree *cbt, const cbt_Node node)
         cbt_SplitNode(cbt, nodeIterator);
         nodeIterator = leb__EdgeNeighbor(nodeIterator);
 
-        while (nodeIterator.id >= minNodeID) {
+        while (nodeIterator.id > minNodeID) {
             cbt_SplitNode(cbt, nodeIterator);
-            nodeIterator = cbt_ParentNode(nodeIterator);
+            nodeIterator = cbt_ParentNode_Fast(nodeIterator);
             cbt_SplitNode(cbt, nodeIterator);
             nodeIterator = leb__EdgeNeighbor(nodeIterator);
         }
@@ -231,11 +229,14 @@ void leb_SplitNode_Square(cbt_Tree *cbt, const cbt_Node node)
         cbt_SplitNode(cbt, nodeIterator);
         nodeIterator = leb__EdgeNeighbor_Square(nodeIterator);
 
-        while (nodeIterator.id >= minNodeID) {
+        while (nodeIterator.id > minNodeID) {
             cbt_SplitNode(cbt, nodeIterator);
-            nodeIterator = cbt_ParentNode(nodeIterator);
-            cbt_SplitNode(cbt, nodeIterator);
-            nodeIterator = leb__EdgeNeighbor_Square(nodeIterator);
+            nodeIterator = cbt_ParentNode_Fast(nodeIterator);
+
+            if (nodeIterator.id > minNodeID) {
+                cbt_SplitNode(cbt, nodeIterator);
+                nodeIterator = leb__EdgeNeighbor_Square(nodeIterator);
+            }
         }
     }
 }
@@ -249,7 +250,7 @@ void leb_SplitNode_Square(cbt_Tree *cbt, const cbt_Node node)
  */
 leb_DiamondParent leb_DecodeDiamondParent(const cbt_Node node)
 {
-    cbt_Node parentNode = cbt_ParentNode(node);
+    cbt_Node parentNode = cbt_ParentNode_Fast(node);
     uint64_t edgeNeighborID = leb_DecodeSameDepthNeighborIDs(parentNode).edge;
     cbt_Node edgeNeighborNode = cbt_CreateNode(
         edgeNeighborID > 0u ? edgeNeighborID : parentNode.id,
@@ -261,7 +262,7 @@ leb_DiamondParent leb_DecodeDiamondParent(const cbt_Node node)
 
 leb_DiamondParent leb_DecodeDiamondParent_Square(const cbt_Node node)
 {
-    cbt_Node parentNode = cbt_ParentNode(node);
+    cbt_Node parentNode = cbt_ParentNode_Fast(node);
     uint64_t edgeNeighborID = leb_DecodeSameDepthNeighborIDs_Square(parentNode).edge;
     cbt_Node edgeNeighborNode = cbt_CreateNode(
         edgeNeighborID > 0u ? edgeNeighborID : parentNode.id,
@@ -456,30 +457,30 @@ static void leb__WindingMatrix(lebMatrix3x3 matrix, uint64_t splitBit)
 static void
 leb__DecodeTransformationMatrix(
     const cbt_Node node,
-    lebMatrix3x3 splittingMatrix
+    lebMatrix3x3 matrix
 ) {
-    leb__IdentityMatrix3x3(splittingMatrix);
+    leb__IdentityMatrix3x3(matrix);
 
     for (int64_t bitID = node.depth - 1; bitID >= 0; --bitID) {
-        leb__SplittingMatrix(splittingMatrix, leb__GetBitValue(node.id, bitID));
+        leb__SplittingMatrix(matrix, leb__GetBitValue(node.id, bitID));
     }
 
-    leb__WindingMatrix(splittingMatrix, node.depth & 1);
+    leb__WindingMatrix(matrix, node.depth & 1);
 }
 
 static void
 leb__DecodeTransformationMatrix_Square(
     const cbt_Node node,
-    lebMatrix3x3 splittingMatrix
+    lebMatrix3x3 matrix
 ) {
-    leb__SquareMatrix(splittingMatrix,
-                      leb__GetBitValue(node.id, node.depth - 1));
+    int64_t bitID = node.depth > 0 ? node.depth - 1 : 0;
+    leb__SquareMatrix(matrix, leb__GetBitValue(node.id, bitID));
 
-    for (int64_t bitID = node.depth - 2; bitID >= 0; --bitID) {
-        leb__SplittingMatrix(splittingMatrix, leb__GetBitValue(node.id, bitID));
+    for (bitID = node.depth - 2; bitID >= 0; --bitID) {
+        leb__SplittingMatrix(matrix, leb__GetBitValue(node.id, bitID));
     }
 
-    leb__WindingMatrix(splittingMatrix, (node.depth ^ 1) & 1);
+    leb__WindingMatrix(matrix, (node.depth ^ 1) & 1);
 }
 
 
