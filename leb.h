@@ -64,9 +64,9 @@ LEBDEF void leb_DecodeNodeAttributeArray_Square(const cbt_Node node,
 #    define LEB_ASSERT(x) assert(x)
 #endif
 
-struct leb__SameDepthNeighborIDs {
+typedef struct {
     uint64_t left, right, edge, node;
-};
+} leb__SameDepthNeighborIDs;
 
 leb__SameDepthNeighborIDs
 leb__CreateSameDepthNeighborIDs(
@@ -136,9 +136,13 @@ leb__SplitNodeIDs(
              b3 = (n3 == 0u) ? 0u : 1u;
 
     if (splitBit == 0u) {
-        return {n4 << 1 | 1, n3 << 1 | b3, n2 << 1 | b2, n4 << 1    };
+        return leb__CreateSameDepthNeighborIDs(
+            n4 << 1 | 1, n3 << 1 | b3, n2 << 1 | b2, n4 << 1
+        );
     } else {
-        return {n3 << 1    , n4 << 1     , n1 << 1     , n4 << 1 | 1};
+        return leb__CreateSameDepthNeighborIDs(
+            n3 << 1    , n4 << 1     , n1 << 1     , n4 << 1 | 1
+        );
     }
 }
 
@@ -395,9 +399,9 @@ leb__Matrix3x3Product(
  *
  */
 static void
-leb__SplittingMatrix(lebMatrix3x3 splittingMatrix, uint64_t splitBit)
+leb__SplittingMatrix(lebMatrix3x3 matrix, uint64_t bitValue)
 {
-    float b = float(splitBit);
+    float b = (float)bitValue;
     float c = 1.0f - b;
     lebMatrix3x3 splitMatrix = {
         {c   , b   , 0.0f},
@@ -406,8 +410,8 @@ leb__SplittingMatrix(lebMatrix3x3 splittingMatrix, uint64_t splitBit)
     };
     lebMatrix3x3 tmp;
 
-    memcpy(tmp, splittingMatrix, sizeof(tmp));
-    leb__Matrix3x3Product(splitMatrix, tmp, splittingMatrix);
+    memcpy(tmp, matrix, sizeof(tmp));
+    leb__Matrix3x3Product(splitMatrix, tmp, matrix);
 }
 
 
@@ -415,9 +419,9 @@ leb__SplittingMatrix(lebMatrix3x3 splittingMatrix, uint64_t splitBit)
  * SquareMatrix -- Computes a mirroring matrix from a split bit
  *
  */
-static void leb__SquareMatrix(lebMatrix3x3 matrix, uint64_t splitBit)
+static void leb__SquareMatrix(lebMatrix3x3 matrix, uint64_t bitValue)
 {
-    float b = float(splitBit);
+    float b = (float)bitValue;
     float c = 1.0f - b;
     lebMatrix3x3 squareMatrix = {
         {c, 0.0f,    b},
@@ -433,9 +437,9 @@ static void leb__SquareMatrix(lebMatrix3x3 matrix, uint64_t splitBit)
  * WindingMatrix -- Computes a mirroring matrix from a split bit
  *
  */
-static void leb__WindingMatrix(lebMatrix3x3 matrix, uint64_t splitBit)
+static void leb__WindingMatrix(lebMatrix3x3 matrix, uint64_t bitValue)
 {
-    float b = float(splitBit);
+    float b = (float)bitValue;
     float c = 1.0f - b;
     lebMatrix3x3 windingMatrix = {
         {c, 0.0f, b},
