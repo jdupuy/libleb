@@ -1,6 +1,6 @@
 # Longest Edge Bisection Library
 
-This library provides algorithms suitable for computing longest edge bisections on multicore processors, including GPUs using the [Concurrent Binary Tree library](https://github.com/jdupuy/libcbt). More details are available in my paper ["Concurrent Binary Trees (with application to Longest Edge Bisection)](https://onrendering.com/).
+This library provides algorithms suitable for computing longest edge bisections on multicore processors, including GPUs using the [Concurrent Binary Tree library](https://github.com/jdupuy/libcbt). More details are available in my paper ["Concurrent Binary Trees (with application to Longest Edge Bisection)"](https://onrendering.com/).
 
 
 **GPU implementation**
